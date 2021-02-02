@@ -1,0 +1,160 @@
+<script type="text/x-template" id="chat-panel">
+   <div class="col-md-10 chat-panel-body" >
+    <nav class="navbar navbar-light bg-light">
+        <div class="container-fluid">
+          <a class="navbar-brand" href="#">{{user.name}}</a>
+        </div>
+        <ul class="navbar-nav">
+            <!-- Notification dropdown -->
+            <li class="nav-item dropdown">
+              <a
+                class="nav-link dropdown-toggle hidden-arrow"
+                href="#"
+                id="navbarDropdownMenuLink"
+                role="button"
+                data-mdb-toggle="dropdown"
+                aria-expanded="false"
+              >
+                <i class="fas fa-bell"></i>
+                <span class="badge rounded-pill badge-notification bg-danger">1</span>
+              </a>
+              <ul
+                class="dropdown-menu dropdown-menu-end"
+                aria-labelledby="navbarDropdownMenuLink"
+              >
+                <li v-for="n in notifications"><a class="dropdown-item" href="#">{{n.body}}</a></li>
+              </ul>
+            </li>
+            <!-- Notification dropdown -->
+          </ul>
+    </nav>
+    <div class="message-list">
+        <div  v-for="m in messages" :class=" (m.user_id === group.me_id) ? 'message-list-panel ' :'message-list-panel right' ">
+            <div class="item-message">
+                <p>{{m.message}}</p>
+            </div>
+        </div>
+    </div>
+        <form @submit.prevent="postMessage">
+            <div class="text-panel">
+                <input type="text" class="form-control" v-model="message">
+                <br>
+                <button class="btn btn-primary btn-block">Send</button>
+            </div>
+        </form>
+   </div>
+</script>
+<style>
+    .chat-panel-body{
+        background-color: #e2e2e2;
+        height: 100vh;
+    }
+    .text-panel{
+        position: absolute;
+        bottom: 10px;
+        width: 83%;
+    }
+    .text-panel input{
+        width: 100%;
+    }
+    .chat-panel-body{
+        padding: 0px;
+    }
+    .navbar{
+        padding-left: 10px;
+    }
+    .message-list{
+        padding-left: 1em;
+        padding-top: 1em;
+    }
+    .message-list{
+        display: flex;
+        flex-direction: column;
+        max-height: 85vh;
+        overflow: scroll;
+    }
+    .item-message{
+        background-color: #fff;
+        min-width: 126px;
+        padding-left: 8px;
+        max-width: 400px;
+        margin-bottom: 20px;
+        align-self: flex-start;
+
+    }
+    .right{
+        align-self: flex-end;
+        margin-right: 20px;
+    }
+    .navbar{
+        padding-right: 100px;
+    }
+</style>
+<script>
+    Vue.component("chat-panel",{
+        template:"#chat-panel",
+        props:["user","notifications"],
+        data(){
+            return {
+                group:{
+                    me_id:Number,
+                    user_id:Number,
+                    group_id:Number
+                },
+                messages:[],
+                message:"",
+            }  
+        },
+        mounted(){
+           
+        },
+        methods:{
+            initSocket(){
+                this.$parent.socket.emit("/me",{token:this.$parent.token},{},(data) => {
+                    this.group = {
+                        me_id:data.data.id,
+                        user_id:this.user.id,
+                    }
+                    this.$parent.socket.emit("/create_group",{token:this.$parent.token},this.group,(data) => {
+                        // console.log("create group >>>>>>>>>>>>>")
+                        // console.log(data)
+                        this.group.group_id = data.data[0].group_id
+                        this.$parent.socket.on(`/message/${this.group.group_id}`,(data) => {
+                            if(data.data.user_id !== this.group.me_id){
+                                let messages = this.messages
+                                    messages.push({
+                                    user_id:data.data.user_id,
+                                    message:data.data.message
+                                })
+                            this.messages = messages
+
+                            } 
+                        })
+                        this.$parent.socket.emit("/message",{token:this.$parent.token},{group_id:this.group.group_id},(data) => {
+                            console.log(">>>>>>>>>>>>>>>>>")
+                            console.log(data.data)
+                            console.log(">>>>>>>>>>>>>>>>>")
+                            this.messages = data.data
+                            console.log("scroll heigh ", document.getElementsByClassName("message-list")[0].scrollHeight)
+                            document.querySelector(".message-list").scrollTop = document.querySelector(".message-list").scrollHeight
+                            
+                        })
+                    }) 
+                })
+            },
+            postMessage(){
+                const data = {
+                    user_id:this.group.me_id,
+                    message:this.message,
+                    group_id:this.group.group_id
+                }
+                this.messages.push(data)
+                console.log(this.messages)
+                this.message = ""
+                this.$parent.socket.emit("/send-message",{token:this.$parent.token},data,() => {
+
+                });
+            }
+        }
+    })
+</script>

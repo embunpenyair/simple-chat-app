@@ -1,0 +1,48 @@
+<script type="text/x-template" id="list-users">
+    <div class="col-md-2">
+        <div class="card">
+            <div class="card-body">
+                <div class="card-title">
+                    <h4>Users</h4>
+                </div>
+                <div>
+                    <ul class="list-group">
+                        <li class="list-group-item" v-for="u in users"><a href="#" @click="setActiveChat(u)">{{u.name}}</a></li>
+                      </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</script>
+<style>
+    .list-group .list-group-item a{
+        display: inline-block;
+    }
+</style>
+<script>
+    Vue.component("list-users",{
+        template:"#list-users",
+        data(){
+            return {
+                users:[]
+            }
+        },
+        mounted(){
+
+            this.$parent.socket.emit("/users",{token:this.$parent.token},(data) => {
+                console.log("data is >>")
+                this.users = data.data
+                console.log(this.users)
+            })
+            this.$parent.socket.on(`/users/`,(data) => {
+                this.users = data.data
+            })
+        },
+        methods:{
+            setActiveChat(u){
+                this.$root.$emit("set_active_chat",u)
+                
+            }
+        }
+    })
+</script>

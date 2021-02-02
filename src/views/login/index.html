@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <%~ E.includeFile("../components/head.html") %> 
+</head>
+<body>
+    <div id="App">
+        <form-login></form-login>
+    </div>
+    <%~ E.includeFile("../components/script.html") %> 
+    <%~ E.includeFile("./components/form_login.html") %> 
+    <script>
+        new Vue({
+            el:"#App",
+        })
+    </script>
+</body>
+</html>

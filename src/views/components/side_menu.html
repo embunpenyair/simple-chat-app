@@ -1,0 +1,29 @@
+<script type="text/x-template" id="side-menu">
+    <div class="col-md-2" >
+        <div class="card" id="card-menu">
+            <div class="card-body ">
+                <div class="title">Hello Zulfikra</div>
+            </div>
+        </div>
+    </div>
+</script>
+<style>
+    .title{
+        font-size:28px;
+    }
+    .title{
+        background-color: #F39C12;
+    }
+    .col-md-2 .card .card-body{
+        background-color: #34495E;
+        height: 100vh;
+    }
+    #card-menu .card-body{
+        padding:0px;
+    }
+</style>
+<script>
+    Vue.component("side-menu",{
+        template:"#side-menu"
+    })
+</script>

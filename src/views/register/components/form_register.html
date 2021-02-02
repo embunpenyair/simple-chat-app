@@ -1,0 +1,82 @@
+<script type="text/x-template" id="form-register">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4 offset-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <form @submit.prevent="register" id="form_register">
+                            <div class="form-group">
+                                <label for="">Name</label>
+                                <input v-model="form.name" type="text" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label for="">Email</label>
+                                <input v-model="form.email" type="text" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label for="">Password</label>
+                                <input v-model="form.password" type="password" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <br>
+                                <button type="submit" class="btn btn-primary btn-block">Register</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</script>
+
+<style>
+    #form_register {
+        margin-top: 5em;
+    }
+</style>
+<!-- script -->
+<script>
+    Vue.component("form-register",{
+        template:"#form-register",
+        data(){
+            return {
+                form:{
+                    name:"",
+                    email:"",
+                    password:""
+                }
+            }
+        },
+        methods:{
+            // async directToLogin(){
+            //     // window.history.pushState("","Login","/login")
+            //     const login = await directTo("/chat")
+            //     console.log(login) 
+            // }
+            async register(){
+                const URL = `${ENDPOINT_API}/register`
+                try {
+                    const response = await fetch(URL,{
+                        method:"POST",
+                        headers:{
+                            "Content-Type":"application/json"
+                        },
+                        body:JSON.stringify(this.form)
+                    })
+                    .then((res) => res.json())
+                    if(response.status_code !== 200) throw response.message
+                    Swal.fire({
+                        icon:"success",
+                        title:"Success register"
+                    })
+                } catch (error) {
+                    console.error(error)
+                    Swal.fire({
+                        icon:"error",
+                        title:error
+                    })
+                }
+            }
+        }
+    })
+</script>

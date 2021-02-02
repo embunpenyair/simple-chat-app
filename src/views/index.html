@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="/assets/css/mdb.min.css">
+</head>
+<body>
+    <div id="App">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <form @submit.prevent="sendMessage">
+                                <textarea v-model="message" name="" class="form-control" cols="30" rows="10"></textarea>
+                                <br>
+                                <button class="btn btn-primary btn-block">Send Message</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="container">
+                        <div class="row">
+                            <button class="btn btn-primary" onclick="main()">Ask Permission</button>
+                            <div class="col-md-12" v-for="ct in chat_list">
+                                <div :class="(ct.id === id) ? 'row justify-content-start' : 'row justify-content-end'">
+                                    <div class="col-md-6">
+                                        <div class="card">
+                                            <div class="card-body">
+                                                <p>{{ct.message}}</p>
+                                            </div>
+                                        </div>   
+                                    </div>   
+                                </div>
+                            </div>
+                        </div>    
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="/vue/vue.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/assets/js/mylib.js"></script>
+    <script src="/assets/js/index.js"></script>
+    <script>
+        window.onpopstate = function(e){
+            if(e.state){
+                document.getElementById("content").innerHTML = e.state.html;
+                document.title = e.state.pageTitle;
+            }
+        }
+        new Vue({
+            el:"#App",
+            data(){
+                return {
+                    socket:'',
+                    message:"",
+                    id:"",
+                    chat_list:[]
+                }
+            },
+            mounted(){
+                this.id = makeid(5)
+                this.socket = new io()
+                this.socket.on("send_message",(data) => {
+                    if(data.id !== this.id){
+                        const text = data.message
+                    }
+                    
+                })
+                // this.socket.on("connect",() => {
+                //     this.socket.send('Hello!');
+                // })
+                // this.serviceWorker()
+               this.notification()
+
+            },
+            methods:{
+                sendMessage(){
+                    const data = {
+                        message:this.message,
+                        id:this.id
+                    }
+                    console.log("call send message")
+                    this.socket.emit("send_message",data,(recieve) => {
+                        
+                        this.message = ""
+                    })
+                },  
+                serviceWorker(){
+                    if(navigator.serviceWorker){
+                        navigator.serviceWorker.register('./service_worker.js')
+                            .then((reg) =>{
+                                console.log("registration scope is success ", reg.scope)
+                            })
+                            .catch((err) => console.error(err))
+                    }else{
+                        console.log("browser not support service worker")
+                    }
+                },
+                notification(){
+                }
+            }
+        })
+    </script>
+      <script src="/assets/js/mdb.min.js"></script>
+</body>
+</html>

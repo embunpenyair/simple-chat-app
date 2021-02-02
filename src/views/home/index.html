@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat</title>
+    <%~ E.includeFile("../components/head.html")  %> 
+</head>
+<body>
+    <div id="App">
+        <div class="container-fluid">
+            <div class="row">
+                <!--  -->
+                <list-users :users="users"></list-users>
+                <chat-panel :notifications="notifications" ref="chatPanel" v-if="is_active" :user="user_active"></chat-panel>
+                <div v-else class="col-md-10" style="text-align: center;background-color: #f0f0f0;height: 100vh;">
+                    <h1 style=" margin-top: 40vh;">Chat Gram</h1>
+                </div>
+            </div>
+        </div>
+    </div>
+    <%~ E.includeFile("../components/script.html")  %>
+    <%~ E.includeFile("./components/list_users.html")%>
+    <%~ E.includeFile("./components/chat_panel.html")%>
+    <script>
+        new Vue({
+            el:"#App",
+            data(){
+                return {
+                    is_active:false,
+                    socket:null,
+                    token:"",
+                    users:[],
+                    user_active:{},
+                    notifications:[]
+                }
+            },
+            created(){
+                this.socket = io("ws://localhost:4000")
+                this.token = localStorage.getItem("nodesession")
+                this.$root.$on("set_active_chat",(data) => {
+                    this.is_active = true
+                    this.user_active = data
+                    setTimeout(() => {
+                        this.$refs.chatPanel.initSocket()
+                    })
+                })
+            },
+            mounted(){
+                this.socket.emit("/notifications",{token:this.token},{page:1},(data) => {
+                    this.notifications = data.data
+                })
+                this.socket.emit("/notifications/total-unread",{token:this.token},{},(data) => {
+                    console.log("tottal notifications ")
+                    console.log(data)
+                })
+                if(navigator.serviceWorker){
+                    navigator.serviceWorker.register('./service_worker.js')
+                        .then((reg) =>{
+                            console.log("registration scope is success ", reg.scope)
+                        })
+                        .catch((err) => console.error(err))
+                }else{
+                    console.log("browser not support service worker")
+                }
+            }
+        })
+    </script> 
+  
+</body>
+</html>

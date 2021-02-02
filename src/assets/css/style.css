@@ -1,0 +1,23 @@
+/* font face */
+@font-face{
+    font-family: "Righteous";
+    src: url('/assets/css/Righteous-Regular.ttf') format('truetype');
+}
+
+body{
+    font-family: "Righteous";
+}
+
+/* button */
+.btn-orange, .btn-orange:link, .btn-orange:focus{
+    background-color: #F39C12;
+}
+
+.btn-orange:hover{
+    background-color: #b8760c;
+}
+
+/* layout */
+.container-fluid{
+    padding-left:0px !important;
+}
